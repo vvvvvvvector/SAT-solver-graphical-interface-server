@@ -1,2 +1,4 @@
 fastapi
-'python-sat[pblib,aiger]'
+python-sat[pblib,aiger]
+uvicorn[standard]
+autopep8
