@@ -4,6 +4,22 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from pysat.solvers import Solver
 
+app = FastAPI()
+
+server_state = {
+    "solver": "cd",
+    "clauses_n": 0,
+    "clauses": []
+}
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
+
 
 def string_to_int(string_arr):
     int_arr = []
@@ -15,25 +31,6 @@ def string_to_int(string_arr):
 class Request(BaseModel):
     solver: str
     formula: str
-
-
-app = FastAPI()
-
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"]
-)
-
-
-server_state = {
-    "solver": "cd",
-    "clauses_n": 0,
-    "clauses": []
-}
 
 
 @app.get('/')
@@ -52,7 +49,6 @@ def solve_one_more():
 
     for i in range(server_state["clauses_n"]):
         clause = server_state["clauses"][i]["clause"]
-        print(clause)
         solver.add_clause(clause)
 
     satisiable = solver.solve()
@@ -67,7 +63,7 @@ def solve_one_more():
     solver.delete()
 
     return {
-        "model": model,
+        "model": server_state["clauses"][server_state["clauses_n"] - 1],
         "satisfiable": satisiable
     }
 
@@ -106,7 +102,7 @@ def solve_my_problem(request: Request):
     return {
         "formula": request.formula,
         "result": {
-            "model": model,
+            "model": server_state["clauses"],
             "satisfiable": satisiable
         }
     }
