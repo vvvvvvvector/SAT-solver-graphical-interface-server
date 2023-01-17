@@ -12,7 +12,8 @@ def string_to_int(string_arr):
     return int_arr
 
 
-class Item(BaseModel):
+class Request(BaseModel):
+    solver: str
     formula: str
 
 
@@ -27,29 +28,31 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-formula = {
-    "length": 0,
+
+server_state = {
+    "solver": "cd",
+    "clauses_n": 0,
     "clauses": []
 }
 
-solver_name = 'mgh'
-
 
 @app.get('/')
-async def root():
+def root():
     return {
         "message": "Hello from server!",
-        "length": formula["length"],
-        "store": formula["clauses"]
+        "selected_solver": server_state["solver"],
+        "clauses_n": server_state["clauses_n"],
+        "clauses": server_state["clauses"]
     }
 
 
 @app.get('/solve-one-more')
-async def solve_one_more():
-    solver = Solver(name=solver_name)
+def solve_one_more():
+    solver = Solver(server_state["solver"])
 
-    for i in range(formula["length"]):
-        clause = formula["clauses"][i]
+    for i in range(server_state["clauses_n"]):
+        clause = server_state["clauses"][i]["clause"]
+        print(clause)
         solver.add_clause(clause)
 
     satisiable = solver.solve()
@@ -57,8 +60,9 @@ async def solve_one_more():
     model = solver.get_model()
 
     if model != None:
-        formula["clauses"].append(list(map(lambda x: x * -1, model)))
-        formula["length"] += 1
+        server_state["clauses"].append(
+            {"id": server_state["clauses_n"], "clause": list(map(lambda x: x * -1, model))})
+        server_state["clauses_n"] += 1
 
     solver.delete()
 
@@ -69,21 +73,23 @@ async def solve_one_more():
 
 
 @app.post('/solve-my-problem')
-async def solve_my_problem(item: Item):
-    solver = Solver(name=solver_name)
+def solve_my_problem(request: Request):
+    server_state["solver"] = request.solver
 
-    formula["length"] = 0
-    formula["clauses"] = []
+    solver = Solver(server_state["solver"])
 
-    string_lines = item.formula.split('\n')
+    server_state["clauses_n"] = 0
+    server_state["clauses"] = []
+
+    string_lines = request.formula.split('\n')
 
     params = string_lines[0].split(' ')
 
-    formula["length"] = int(params[3])
+    server_state["clauses_n"] = int(params[3])
 
     for i in range(int(params[3])):
         clause = string_to_int(string_lines[i + 1].split(' '))
-        formula["clauses"].append(clause)
+        server_state["clauses"].append({"id": i, "clause": clause})
         solver.add_clause(clause)
 
     satisiable = solver.solve()
@@ -91,13 +97,14 @@ async def solve_my_problem(item: Item):
     model = solver.get_model()
 
     if model != None:
-        formula["clauses"].append(list(map(lambda x: x * -1, model)))
-        formula["length"] += 1
+        server_state["clauses"].append(
+            {"id": server_state["clauses_n"], "clause": list(map(lambda x: x * -1, model))})
+        server_state["clauses_n"] += 1
 
     solver.delete()
 
     return {
-        "formula": item.formula,
+        "formula": request.formula,
         "result": {
             "model": model,
             "satisfiable": satisiable
