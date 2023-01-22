@@ -43,7 +43,7 @@ def root():
     }
 
 
-@app.get('/solve-one-more')
+@app.get('/find-next-solution')
 def solve_one_more():
     solver = Solver(server_state["solver"])
 
@@ -88,7 +88,7 @@ def solve_my_problem(request: Request):
         server_state["clauses"].append({"id": i, "clause": clause})
         solver.add_clause(clause)
 
-    satisiable = solver.solve()
+    satisfiable = solver.solve()
 
     model = solver.get_model()
 
@@ -102,7 +102,7 @@ def solve_my_problem(request: Request):
     return {
         "formula": request.formula,
         "result": {
-            "model": server_state["clauses"],
-            "satisfiable": satisiable
+            "clauses": server_state["clauses"],
+            "satisfiable": satisfiable
         }
     }
