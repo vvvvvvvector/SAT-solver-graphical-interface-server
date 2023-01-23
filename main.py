@@ -36,7 +36,7 @@ class Request(BaseModel):
 @app.get('/')
 def root():
     return {
-        "message": "Hello from server!",
+        "message": "Hello from FastAPI.",
         "selected_solver": server_state["solver"],
         "clauses_n": server_state["clauses_n"],
         "clauses": server_state["clauses"]
@@ -48,7 +48,7 @@ def solve_one_more():
     solver = Solver(server_state["solver"])
 
     for i in range(server_state["clauses_n"]):
-        clause = server_state["clauses"][i]["clause"]
+        clause = server_state["clauses"][i]["variables"]
         solver.add_clause(clause)
 
     satisiable = solver.solve()
@@ -57,13 +57,13 @@ def solve_one_more():
 
     if model != None:
         server_state["clauses"].append(
-            {"id": server_state["clauses_n"], "clause": list(map(lambda x: x * -1, model))})
+            {"id": server_state["clauses_n"], "variables": list(map(lambda x: x * -1, model))})
         server_state["clauses_n"] += 1
 
     solver.delete()
 
     return {
-        "model": server_state["clauses"][server_state["clauses_n"] - 1],
+        "clause": server_state["clauses"][server_state["clauses_n"] - 1],
         "satisfiable": satisiable
     }
 
@@ -85,7 +85,7 @@ def solve_my_problem(request: Request):
 
     for i in range(int(params[3])):
         clause = string_to_int(string_lines[i + 1].split(' '))
-        server_state["clauses"].append({"id": i, "clause": clause})
+        server_state["clauses"].append({"id": i, "variables": clause})
         solver.add_clause(clause)
 
     satisfiable = solver.solve()
@@ -94,15 +94,13 @@ def solve_my_problem(request: Request):
 
     if model != None:
         server_state["clauses"].append(
-            {"id": server_state["clauses_n"], "clause": list(map(lambda x: x * -1, model))})
+            {"id": server_state["clauses_n"], "variables": list(map(lambda x: x * -1, model))})
         server_state["clauses_n"] += 1
 
     solver.delete()
 
     return {
         "formula": request.formula,
-        "result": {
-            "clauses": server_state["clauses"],
-            "satisfiable": satisfiable
-        }
+        "clauses": server_state["clauses"],
+        "satisfiable": satisfiable
     }
