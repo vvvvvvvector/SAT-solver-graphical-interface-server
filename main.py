@@ -63,7 +63,7 @@ def solve_one_more():
     solver.delete()
 
     return {
-        "clause": server_state["clauses"][server_state["clauses_n"] - 1],
+        "clause": (server_state["clauses"][server_state["clauses_n"] - 1] if model != None else []),
         "satisfiable": satisiable
     }
 
@@ -101,6 +101,7 @@ def solve_my_problem(request: Request):
 
     return {
         "formula": request.formula,
-        "clauses": server_state["clauses"],
+        "clauses": server_state["clauses"][:-1],
+        "model": server_state["clauses"][server_state["clauses_n"] - 1],
         "satisfiable": satisfiable
     }
