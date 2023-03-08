@@ -1,14 +1,10 @@
+import json
+
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 
 from pysat.solvers import Solver
-
-server_state = {
-    "solver": "cd",
-    "clauses_n": 0,
-    "clauses": []
-}
 
 app = FastAPI()
 
@@ -28,78 +24,83 @@ def string_to_int(string_arr):
     return int_arr
 
 
-class Request(BaseModel):
+class SolveRequest(BaseModel):
     solver: str
     cnf: str
 
 
-@app.get('/')
-def root():
-    return {
-        "selected_solver": server_state["solver"],
-        "clauses_n": server_state["clauses_n"],
-        "clauses": server_state["clauses"]
-    }
+class NextSolutionRequest(BaseModel):
+    solver: str
+    formula: str
 
 
-@app.get('/next-solution')
-def solve():
-    solver = Solver(server_state["solver"])
+@app.post('/next-solution')
+def solve(request: NextSolutionRequest):
+    solver = Solver(request.solver)  # creating a solver
 
-    for i in range(server_state["clauses_n"]):
-        clause = server_state["clauses"][i]["variables"]
-        solver.add_clause(clause)
+    parsed_formula = json.loads(request.formula)
 
-    satisiable = solver.solve()
+    for clause in parsed_formula:
+        solver.add_clause(clause["variables"])
 
-    model = solver.get_model()
+    satisfiable = solver.solve()
 
-    if model != None:
-        server_state["clauses"].append(
-            {"id": server_state["clauses_n"], "variables": list(map(lambda x: x * -1, model))})
-        server_state["clauses_n"] += 1
+    next_solution = solver.get_model()
 
     solver.delete()
 
-    return {
-        "clause": (server_state["clauses"][server_state["clauses_n"] - 1] if model != None else []),
-        "satisfiable": satisiable
-    }
+    if satisfiable != False:
+        parsed_formula.append({"id": parsed_formula[len(parsed_formula) - 1]["id"] + 1, "variables": list(
+            map(lambda x: x * -1, next_solution))})
+
+        return {
+            "satisfiable": satisfiable,
+            "clauses": parsed_formula,
+            "next_solution": next_solution
+        }
+    else:
+        return {
+            "satisfiable": False
+        }
 
 
-@app.post('/solve')
-def solve(request: Request):
-    server_state["solver"] = request.solver
+@ app.post('/solve')
+def solve(request: SolveRequest):
+    solver = Solver(request.solver)  # creating a solver
 
-    solver = Solver(server_state["solver"])
+    file_by_lines = request.cnf.split('\n')  # dividing the cnf file into lines
 
-    server_state["clauses_n"] = 0
-    server_state["clauses"] = []
+    # getting parameters of the formula (variables_amount, clauses_amount)
+    params = file_by_lines[0].split(' ')
 
-    string_lines = request.cnf.split('\n')
+    clauses = []
+    clauses_amount = int(params[3])
 
-    params = string_lines[0].split(' ')
+    for i in range(clauses_amount):
+        clause = string_to_int(file_by_lines[i + 1].split(' '))
 
-    server_state["clauses_n"] = int(params[3])
+        clauses.append({"id": i, "variables": clause})
 
-    for i in range(int(params[3])):
-        clause = string_to_int(string_lines[i + 1].split(' '))
-        server_state["clauses"].append({"id": i, "variables": clause})
         solver.add_clause(clause)
 
     satisfiable = solver.solve()
 
-    model = solver.get_model()
-
-    if model != None:
-        server_state["clauses"].append(
-            {"id": server_state["clauses_n"], "variables": list(map(lambda x: x * -1, model))})
-        server_state["clauses_n"] += 1
+    first_solution = solver.get_model()
 
     solver.delete()
 
-    return {
-        "clauses": server_state["clauses"][:-1],
-        "model": server_state["clauses"][server_state["clauses_n"] - 1],
-        "satisfiable": satisfiable
-    }
+    if satisfiable != False:
+        clauses.append({"id": clauses_amount,
+                       "variables": list(map(lambda x: x * -1, first_solution))})
+
+        return {
+            "satisfiable": satisfiable,
+            "clauses": clauses,
+            "first_solution": first_solution
+        }
+    else:
+        return {
+            "satisfiable": False,
+            "clauses": clauses,
+            "first_solution": []
+        }
