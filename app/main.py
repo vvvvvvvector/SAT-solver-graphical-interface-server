@@ -26,7 +26,7 @@ def string_to_int(string_arr):
 
 class SolveRequest(BaseModel):
     solver: str
-    cnf: str
+    dimacs: str
 
 
 class NextSolutionRequest(BaseModel):
@@ -68,7 +68,8 @@ def solve(request: NextSolutionRequest):
 def solve(request: SolveRequest):
     solver = Solver(request.solver)  # creating a solver
 
-    file_by_lines = request.cnf.split('\n')  # dividing the cnf file into lines
+    # dividing the cnf file into lines
+    file_by_lines = request.dimacs.split('\n')
 
     # getting parameters of the formula (variables_amount, clauses_amount)
     params = file_by_lines[0].split(' ')
