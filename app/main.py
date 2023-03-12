@@ -29,42 +29,17 @@ class SolveRequest(BaseModel):
     dimacs: str
 
 
+class ReSolveRequest(BaseModel):
+    solver: str
+    formula: str
+
+
 class NextSolutionRequest(BaseModel):
     solver: str
     formula: str
 
 
-@app.post('/next-solution')
-def solve(request: NextSolutionRequest):
-    solver = Solver(request.solver)  # creating a solver
-
-    parsed_formula = json.loads(request.formula)
-
-    for clause in parsed_formula:
-        solver.add_clause(clause["variables"])
-
-    satisfiable = solver.solve()
-
-    next_solution = solver.get_model()
-
-    solver.delete()
-
-    if satisfiable != False:
-        parsed_formula.append({"id": parsed_formula[len(parsed_formula) - 1]["id"] + 1, "variables": list(
-            map(lambda x: x * -1, next_solution))})
-
-        return {
-            "satisfiable": satisfiable,
-            "clauses": parsed_formula,
-            "next_solution": next_solution
-        }
-    else:
-        return {
-            "satisfiable": False
-        }
-
-
-@ app.post('/solve')
+@app.post('/solve')
 def solve(request: SolveRequest):
     solver = Solver(request.solver)  # creating a solver
 
@@ -104,4 +79,66 @@ def solve(request: SolveRequest):
             "satisfiable": False,
             "clauses": clauses,
             "first_solution": []
+        }
+
+
+@app.post('/re-solve')
+def re_solve(request: ReSolveRequest):
+    solver = Solver(request.solver)  # creating a solver
+
+    parsed_formula = json.loads(request.formula)
+
+    for clause in parsed_formula:
+        solver.add_clause(clause["variables"])
+
+    satisfiable = solver.solve()
+
+    first_solution = solver.get_model()
+
+    solver.delete()
+
+    if satisfiable != False:
+        parsed_formula.append(
+            {"id": parsed_formula[len(parsed_formula) - 1]["id"] + 1, "variables": list(map(lambda x: x * -1, first_solution))})
+
+        return {
+            "satisfiable": satisfiable,
+            "clauses": parsed_formula,
+            "first_solution": first_solution
+        }
+    else:
+        return {
+            "satisfiable": False,
+            "clauses": parsed_formula,
+            "first_solution": []
+        }
+
+
+@app.post('/next-solution')
+def next(request: NextSolutionRequest):
+    solver = Solver(request.solver)  # creating a solver
+
+    parsed_formula = json.loads(request.formula)
+
+    for clause in parsed_formula:
+        solver.add_clause(clause["variables"])
+
+    satisfiable = solver.solve()
+
+    next_solution = solver.get_model()
+
+    solver.delete()
+
+    if satisfiable != False:
+        parsed_formula.append({"id": parsed_formula[len(parsed_formula) - 1]["id"] + 1, "variables": list(
+            map(lambda x: x * -1, next_solution))})
+
+        return {
+            "satisfiable": satisfiable,
+            "clauses": parsed_formula,
+            "next_solution": next_solution
+        }
+    else:
+        return {
+            "satisfiable": False
         }
