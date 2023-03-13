@@ -29,12 +29,7 @@ class SolveRequest(BaseModel):
     dimacs: str
 
 
-class ReSolveRequest(BaseModel):
-    solver: str
-    formula: str
-
-
-class NextSolutionRequest(BaseModel):
+class NextRequest(BaseModel):
     solver: str
     formula: str
 
@@ -82,40 +77,8 @@ def solve(request: SolveRequest):
         }
 
 
-@app.post('/re-solve')
-def re_solve(request: ReSolveRequest):
-    solver = Solver(request.solver)  # creating a solver
-
-    parsed_formula = json.loads(request.formula)
-
-    for clause in parsed_formula:
-        solver.add_clause(clause["variables"])
-
-    satisfiable = solver.solve()
-
-    first_solution = solver.get_model()
-
-    solver.delete()
-
-    if satisfiable != False:
-        parsed_formula.append(
-            {"id": parsed_formula[len(parsed_formula) - 1]["id"] + 1, "variables": list(map(lambda x: x * -1, first_solution))})
-
-        return {
-            "satisfiable": satisfiable,
-            "clauses": parsed_formula,
-            "first_solution": first_solution
-        }
-    else:
-        return {
-            "satisfiable": False,
-            "clauses": parsed_formula,
-            "first_solution": []
-        }
-
-
 @app.post('/next-solution')
-def next(request: NextSolutionRequest):
+def next(request: NextRequest):
     solver = Solver(request.solver)  # creating a solver
 
     parsed_formula = json.loads(request.formula)
