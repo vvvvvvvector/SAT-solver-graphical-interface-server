@@ -1,6 +1,6 @@
 import json
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -10,11 +10,16 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:5173"],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["POST"],
     allow_headers=["*"]
 )
+
+
+@app.get('/')
+def root():
+    return {'message': 'backend is running...'}
 
 
 def string_to_int(string_arr):
@@ -45,10 +50,21 @@ def solve(request: SolveRequest):
     params = file_by_lines[0].split(' ')
 
     clauses = []
+
+    variables_amount = int(params[2])
     clauses_amount = int(params[3])
+
+    if clauses_amount != len(file_by_lines) - 1:
+        raise HTTPException(
+            status_code=418, detail=f"Wrong number of clauses!\n\nIn formula definition: {clauses_amount}\nIn dimacs: {len(file_by_lines) - 1}")
 
     for i in range(clauses_amount):
         clause = string_to_int(file_by_lines[i + 1].split(' '))
+
+        for variable in clause:
+            if abs(variable) > variables_amount:
+                raise HTTPException(
+                    status_code=419, detail=f"Wrong variable value!\n\nError in line: {i + 2}")
 
         clauses.append({"id": i, "variables": clause})
 
