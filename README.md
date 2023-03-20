@@ -22,6 +22,8 @@ trzeba napisać w konsoli: **pip install -r requirements.txt**
 
 ## 7. Uruchomić program kiedy znajdujesz się w katalogu projektu
 
-trzeba napisać w konsoli: **uvicorn main:app --port 8000 --reload**
+1. trzeba wejsć do katalogu **app**
+2. trzeba napisać w konsoli: **uvicorn main:app --port 8000 --reload**
+
 
 ta komenda uruchomi program na porcie 8000
