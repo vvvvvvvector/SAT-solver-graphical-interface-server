@@ -47,7 +47,9 @@ def solve(request: SolveRequest):
     file_by_lines = request.dimacs.split('\n')
 
     # getting parameters of the formula (variables_amount, clauses_amount)
-    params = file_by_lines[0].split(' ')
+    params = list(filter(None, file_by_lines[0].split(' ')))
+
+    print(params)
 
     clauses = []
 
@@ -59,7 +61,8 @@ def solve(request: SolveRequest):
             status_code=418, detail=f"Wrong number of clauses!\n\nIn formula definition: {clauses_amount}\nIn dimacs: {len(file_by_lines) - 1}")
 
     for i in range(clauses_amount):
-        clause = string_to_int(file_by_lines[i + 1].split(' '))
+        clause = string_to_int(
+            list(filter(None, file_by_lines[i + 1].split(' '))))
 
         for variable in clause:
             if abs(variable) > variables_amount:
