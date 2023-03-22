@@ -1,10 +1,12 @@
-import json
+from pysat.solvers import Solver
+
+from utils import string_to_int
+from models import SolveRequest, NextRequest, LinkRequest
 
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 
-from pysat.solvers import Solver
+import json
 
 app = FastAPI()
 
@@ -22,21 +24,15 @@ def root():
     return {'message': 'backend is running...'}
 
 
-def string_to_int(string_arr):
-    int_arr = []
-    for i in range(len(string_arr) - 1):
-        int_arr.append(int(string_arr[i]))
-    return int_arr
+@app.post('/link')
+def link(request: LinkRequest):
+    print(request.firstDimacs)
 
+    print(request.secondDimacs)
 
-class SolveRequest(BaseModel):
-    solver: str
-    dimacs: str
-
-
-class NextRequest(BaseModel):
-    solver: str
-    formula: str
+    return {
+        "success": True
+    }
 
 
 @app.post('/solve')
@@ -48,8 +44,6 @@ def solve(request: SolveRequest):
 
     # getting parameters of the formula (variables_amount, clauses_amount)
     params = list(filter(None, file_by_lines[0].split(' ')))
-
-    print(params)
 
     clauses = []
 
