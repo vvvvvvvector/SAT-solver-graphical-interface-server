@@ -1,7 +1,7 @@
 from pysat.solvers import Solver
 
-from utils import string_to_int
-from models import SolveRequest, NextRequest, LinkRequest
+import utils
+from models import SolveRequest, NextRequest, LinkRequest, FixRequest
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -24,6 +24,39 @@ def root():
     return {'message': 'backend is running...'}
 
 
+@app.post('/fix')
+def fix(requst: FixRequest):
+    file_by_lines = requst.dimacs.split('\n')
+
+    variables = set()
+    clauses_amount = 0
+
+    clauses = ""
+
+    for line in file_by_lines[1:]:
+        clause = list(filter(None, line.split(' ')))
+
+        try:
+            for variable in utils.string_to_int(clause):
+                variables.add(abs(variable))
+
+            clause_string = " ".join(clause)
+
+            if clause_string[len(clause_string) - 1] != '0':
+                clause_string += ' 0'
+
+            clauses += clause_string + "\n"
+
+            clauses_amount += 1
+
+        except:
+            print(f"Error while parsing line: {line}")
+
+    return {
+        "fixed": f"p cnf {len(variables)} {clauses_amount}\n" + clauses[:-1]
+    }
+
+
 @app.post('/link')
 def link(request: LinkRequest):
     print(request.firstDimacs)
@@ -35,7 +68,7 @@ def link(request: LinkRequest):
     }
 
 
-@app.post('/solve')
+@ app.post('/solve')
 def solve(request: SolveRequest):
     solver = Solver(request.solver)  # creating a solver
 
@@ -50,18 +83,20 @@ def solve(request: SolveRequest):
     variables_amount = int(params[2])
     clauses_amount = int(params[3])
 
+    # checking if the number of clauses is correct
     if clauses_amount != len(file_by_lines) - 1:
         raise HTTPException(
-            status_code=418, detail=f"Wrong number of clauses!\n\nIn formula definition: {clauses_amount}\nIn dimacs: {len(file_by_lines) - 1}")
+            status_code=418, detail=f"Wrong number of clauses!\nIn formula definition: {clauses_amount}\nIn dimacs: {len(file_by_lines) - 1}")
 
     for i in range(clauses_amount):
-        clause = string_to_int(
+        clause = utils.string_to_int(
             list(filter(None, file_by_lines[i + 1].split(' '))))
 
+        # checking if the clause is correct
         for variable in clause:
             if abs(variable) > variables_amount:
                 raise HTTPException(
-                    status_code=419, detail=f"Wrong variable value!\n\nError in line: {i + 2}")
+                    status_code=419, detail=f"Wrong variable value!\nError in line: {i + 2}")
 
         clauses.append({"id": i, "variables": clause})
 
@@ -90,7 +125,7 @@ def solve(request: SolveRequest):
         }
 
 
-@app.post('/next-solution')
+@ app.post('/next-solution')
 def next(request: NextRequest):
     solver = Solver(request.solver)  # creating a solver
 
