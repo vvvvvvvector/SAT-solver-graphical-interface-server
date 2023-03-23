@@ -1,6 +1,10 @@
 from pydantic import BaseModel
 
 
+class FixRequest(BaseModel):
+    dimacs: str
+
+
 class LinkRequest(BaseModel):
     firstDimacs: str
     secondDimacs: str
