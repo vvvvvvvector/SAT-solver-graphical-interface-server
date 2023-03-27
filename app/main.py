@@ -1,7 +1,7 @@
 from pysat.solvers import Solver
 
 import utils
-from models import SolveRequest, NextRequest, LinkRequest, FixRequest
+import models
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -25,7 +25,7 @@ def root():
 
 
 @app.post('/fix')
-def fix(requst: FixRequest):
+def fix(requst: models.FixRequest):
     file_by_lines = requst.dimacs.split('\n')
 
     variables = set()
@@ -58,7 +58,7 @@ def fix(requst: FixRequest):
 
 
 @app.post('/link')
-def link(request: LinkRequest):
+def link(request: models.LinkRequest):
     print(request.firstDimacs)
 
     print(request.secondDimacs)
@@ -68,8 +68,8 @@ def link(request: LinkRequest):
     }
 
 
-@ app.post('/solve')
-def solve(request: SolveRequest):
+@app.post('/solve')
+def solve(request: models.SolveRequest):
     solver = Solver(request.solver)  # creating a solver
 
     # dividing the cnf file into lines
@@ -125,8 +125,8 @@ def solve(request: SolveRequest):
         }
 
 
-@ app.post('/next-solution')
-def next(request: NextRequest):
+@app.post('/next-solution')
+def next(request: models.NextRequest):
     solver = Solver(request.solver)  # creating a solver
 
     parsed_formula = json.loads(request.formula)
