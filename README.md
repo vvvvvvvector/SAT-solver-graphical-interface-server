@@ -10,7 +10,10 @@ trzeba napisać w konsoli: **python3 -m venv venv**
 
 ## 4. Uruchomić środowisko wirtualne
 
-trzeba napisać w konsoli: **source venv/bin/activate**
+trzeba napisać w konsoli: 
+ - MacOS: **source venv/bin/activate**
+ - windows: **source venv/Scripts/activate**
+ - Linux: **source venv/???/activate**, nie wiem, nie sprawdzałem
 
 ## 5. Sprawdzić czy się uruchomiło
 
