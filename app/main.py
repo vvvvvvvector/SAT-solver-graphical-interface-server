@@ -33,7 +33,7 @@ def fix(requst: models.FixRequest):
 
     clauses = ""
 
-    for line in file_by_lines[1:]:
+    for line in file_by_lines[0:]:
         clause = list(filter(None, line.split(' ')))
 
         try:
@@ -76,7 +76,12 @@ def solve(request: models.SolveRequest):
     file_by_lines = request.dimacs.split('\n')
 
     # getting parameters of the formula (variables_amount, clauses_amount)
-    params = list(filter(None, file_by_lines[0].split(' ')))
+
+    if file_by_lines[0].startswith("p cnf"):
+        params = list(filter(None, file_by_lines[0].split(' ')))
+    else:
+        raise HTTPException(
+            status_code=420, detail="There is no formula definition!")
 
     clauses = []
 
