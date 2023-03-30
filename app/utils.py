@@ -8,3 +8,7 @@ def string_to_int(string_arr):
         int_arr.append(int(variable))
 
     return int_arr
+
+
+def remove_duplicates(clauses):
+    return list(dict.fromkeys(clauses))
