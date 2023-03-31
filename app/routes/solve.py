@@ -15,6 +15,9 @@ def solve(request: schemas.SolveRequest):
     # dividing the cnf file into lines
     file_by_lines = request.dimacs.split('\n')
 
+    # removing empty lines if there are any
+    file_by_lines = list(filter(None, file_by_lines))
+
     # getting parameters of the formula (variables_amount, clauses_amount)
 
     if file_by_lines[0].startswith("p cnf"):
