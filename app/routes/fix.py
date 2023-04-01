@@ -15,7 +15,7 @@ def fix(request: schemas.FixRequest):
 
     clauses = ""
 
-    for line in file_by_lines[0:]:
+    for line in file_by_lines:
         clause = list(filter(None, line.split(' ')))
 
         try:
