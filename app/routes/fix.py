@@ -10,6 +10,9 @@ fixroute = APIRouter()
 def fix(request: schemas.FixRequest):
     file_by_lines = request.dimacs.split('\n')
 
+    # removing empty lines if there are any
+    file_by_lines = list(filter(None, file_by_lines))
+
     variables = set()
     clauses_amount = 0
 
@@ -36,4 +39,25 @@ def fix(request: schemas.FixRequest):
 
     return {
         "fixed": f"p cnf {len(variables)} {clauses_amount}\n" + clauses[:-1]
+    }
+
+
+@fixroute.post('/remove-duplicates')
+def remove(request: schemas.FixRequest):
+    file_by_lines = request.dimacs.split('\n')
+
+    # removing empty lines if there are any
+    file_by_lines = list(filter(None, file_by_lines))
+
+    formula_params = list(filter(None, file_by_lines[0].split(' ')))
+
+    clauses = []
+
+    for line in file_by_lines[1:]:
+        clauses.append(" ".join(list(filter(None, line.split(' ')))))
+
+    no_duplicates = utils.remove_duplicates(clauses)
+
+    return {
+        "fixed": f"p cnf {formula_params[2]} {len(no_duplicates)}\n" + "\n".join(no_duplicates)
     }
