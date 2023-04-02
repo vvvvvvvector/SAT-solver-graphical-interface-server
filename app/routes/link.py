@@ -28,6 +28,19 @@ def link(request: schemas.LinkRequest):
     first_by_lines = list(filter(None, first_by_lines))
     second_by_lines = list(filter(None, second_by_lines))
 
+    first_params = list(filter(None, first_by_lines[0].split(' ')))
+    second_params = list(filter(None, second_by_lines[0].split(' ')))
+
+    if int(first_params[3]) != len(first_by_lines[1:]):
+        raise HTTPException(
+            status_code=424, detail=f"The first formula has wrong amount of clauses!\n\nIn formula definition: {first_params[3]}\nIn dimacs: {len(first_by_lines) - 1}"
+        )
+
+    if int(second_params[3]) != len(second_by_lines[1:]):
+        raise HTTPException(
+            status_code=425, detail=f"The second formula has wrong amount of clauses!\n\nIn formula definition: {second_params[3]}\nIn dimacs: {len(second_by_lines) - 1}"
+        )
+
     if utils.compare_formulas(first_by_lines, second_by_lines):
         raise HTTPException(
             status_code=421, detail="Formulas are the same!"
