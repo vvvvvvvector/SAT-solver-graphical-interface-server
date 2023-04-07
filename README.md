@@ -31,4 +31,4 @@ trzeba napisać w konsoli: **pip install -r requirements.txt**
 1. trzeba wejsć do katalogu **app**
 2. trzeba napisać w konsoli: **uvicorn main:app --port 8000 --reload**
 
-ta komenda uruchomi program na porcie 8000
+ta komenda uruchomi program na porcie 8000, **nie trzeba tego zmieniać**, ten port jest zahardkodowany na frontendzie
