@@ -14,7 +14,6 @@ pycodestyle==2.10.0
 pydantic==1.10.7
 pypblib==0.0.4
 pyrsistent==0.19.3
-python-dotenv==1.0.0
 python-sat==0.1.8.dev2
 PyYAML==6.0
 six==1.16.0
