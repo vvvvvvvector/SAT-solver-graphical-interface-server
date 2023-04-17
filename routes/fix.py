@@ -37,8 +37,10 @@ def fix(request: schemas.FixRequest):
         except:
             print(f"Error while parsing line: {line}")
 
+    variables = sorted(variables)
+
     return {
-        "fixed": f"p cnf {len(variables)} {clauses_amount}\n" + clauses[:-1]
+        "fixed": f"p cnf {variables[len(variables) - 1]} {clauses_amount}\n" + clauses[:-1]
     }
 
 
