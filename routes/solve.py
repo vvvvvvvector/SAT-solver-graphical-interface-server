@@ -40,12 +40,6 @@ def solve(request: schemas.SolveRequest):
         clause = utils.string_to_int(
             list(filter(None, file_by_lines[i + 1].split(' '))))
 
-        # checking if the clause is correct
-        for variable in clause:
-            if abs(variable) > variables_amount:
-                raise HTTPException(
-                    status_code=419, detail=f"Wrong variable value!\nError in line: {i + 2}")
-
         clauses.append({"id": i, "variables": clause})
 
         solver.add_clause(clause)
