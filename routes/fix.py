@@ -53,10 +53,22 @@ def remove(request: schemas.FixRequest):
 
     formula_params = list(filter(None, file_by_lines[0].split(' ')))
 
+    clauses_int = []
+
     clauses = []
 
     for line in file_by_lines[1:]:
         clauses.append(" ".join(list(filter(None, line.split(' ')))))
+
+    for line in file_by_lines[1:]:
+        clauses_int.append(
+            list(map(int, filter(lambda x: x != '' and x != '0', line.split(' ')))))
+
+    for clause in clauses_int:
+        clause.sort()
+
+    for i in range(len(clauses_int)):
+        clauses[i] = " ".join(list(map(str, clauses_int[i]))) + " 0"
 
     no_duplicates = utils.remove_duplicates(clauses)
 
