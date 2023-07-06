@@ -18,7 +18,7 @@ def fix(request: schemas.FixRequest):
 
     clauses = ""
 
-    for line in file_by_lines:
+    for line in file_by_lines[1:]:
         clause = list(filter(None, line.split(' ')))
 
         try:
@@ -27,12 +27,13 @@ def fix(request: schemas.FixRequest):
 
             clause_string = " ".join(clause)
 
-            if clause_string[len(clause_string) - 1] != '0':
-                clause_string += ' 0'
+            if clause_string != '0':
+                if not clause_string.endswith(' 0'):
+                    clause_string += ' 0'
 
-            clauses += clause_string + "\n"
+                clauses += clause_string + "\n"
 
-            clauses_amount += 1
+                clauses_amount += 1
 
         except:
             print(f"Error while parsing line: {line}")
