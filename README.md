@@ -1,34 +1,64 @@
-# How to uruchomić backend
+An open source application built using [FastAPI](https://fastapi.tiangolo.com/).
 
-## 1. Sklonować projekt
+## About this project
 
-## 2. Wejść do katalogu projektu
+[👉 read here 👈](https://github.com/vvvvvvvector/SAT-solver-graphical-interface-client?tab=readme-ov-file#about-this-project)
 
-## 3. Stworzyć środowisko wirtualne
+## Running Locally
 
-trzeba napisać w konsoli: **python3 -m venv venv**\
-lub: **python -m venv venv** jesli nie masz python3
+1. Open the project directory in a terminal
 
-## 4. Uruchomić środowisko wirtualne
+    ```sh
+    cd project-name
+    ```
 
-trzeba napisać w konsoli:
+2. Create a virtual environment:
 
-- MacOS: **source venv/bin/activate**
-- windows: **source venv/Scripts/activate**
-- Linux: **source venv/???/activate**, nie wiem, nie sprawdzałem
+   using python3:
+   ```sh
+   python3 -m venv venv
+   ```
 
-## 5. Sprawdzić czy się uruchomiło
+   or if you don't have python3:
+   ```sh
+   python -m venv venv
+   ``` 
 
-trzeba napisać w konsoli: **which python**\
-powninno to wyświetlić ścieżkę do pythona w środowisku wirtualnym
+3. Run the virtual environment:
 
-## 6. Zainstalować kilka pakietów
+   MacOS:
+   ```sh
+   source venv/bin/activate
+   ```
 
-trzeba napisać w konsoli: **pip install -r requirements.txt**
+   Windows:
+   ```sh
+   source venv/Scripts/activate
+   ```
 
-## 7. Uruchomić program kiedy znajdujesz się w katalogu projektu
+   Linux (i don't know, haven't tried):
+   ```sh
+   source venv/???/activate
+   ```
 
-1. trzeba wejsć do katalogu **app**
-2. trzeba napisać w konsoli: **uvicorn main:app --port 8000 --reload**
+4. Check if it's running using following command:
 
-ta komenda uruchomi program na porcie 8000, **nie trzeba tego zmieniać**, ten port jest zahardkodowany na frontendzie
+    ```sh
+    which python
+    ```
+
+    if everything is fine you are going to see a path for python in the virtual environment
+
+5. Install dependencies:
+
+    ```sh
+    pip install -r requirements.txt
+    ```
+
+6. Start the development server:
+
+    ```sh
+    uvicorn main:app --port 8000 --reload
+    ```
+
+    this command will run the program on 8000 port, **don't change it**, this port is hardcoded on the [client-side](https://github.com/vvvvvvvector/SAT-solver-graphical-interface-client)
