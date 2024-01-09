@@ -34,6 +34,8 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+# run server
+
 if __name__ == '__main__':
     config = uvicorn.Config("main:app", port=int(getenv('PORT', 8000)))
     server = uvicorn.Server(config)
