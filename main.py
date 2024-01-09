@@ -6,6 +6,10 @@ from routes.fix import fixroute
 from routes.link import linkroute
 from routes.next import nextroute
 
+import uvicorn
+from os import getenv
+
+
 app = FastAPI()
 
 
@@ -29,3 +33,8 @@ app.add_middleware(
     allow_methods=["POST"],
     allow_headers=["*"]
 )
+
+if __name__ == '__main__':
+    config = uvicorn.Config("main:app", port=int(getenv('PORT', 8000)))
+    server = uvicorn.Server(config)
+    server.run()
